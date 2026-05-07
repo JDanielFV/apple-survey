@@ -1,0 +1,71 @@
+{
+  "surveys": [
+    {
+      "id": "bd0c994d-bf00-420a-8f6f-cf5f08190c8f",
+      "name": "Notaría de prueba",
+      "slug": "notaria-de-prueba",
+      "created_at": "2026-05-07T23:04:14.524Z"
+    },
+    {
+      "id": "40a82446-9535-4df7-b6ef-88ae23c1d20b",
+      "name": "not-prueba",
+      "slug": "not-prueba",
+      "created_at": "2026-05-07T23:06:45.710Z"
+    }
+  ],
+  "responses": [
+    {
+      "id": "0d4c90ce-7b04-4fa9-b30d-a617420946cc",
+      "survey_id": "40a82446-9535-4df7-b6ef-88ae23c1d20b",
+      "created_at": "2026-05-07T23:11:19.860Z",
+      "rating": 5,
+      "updated_at": "2026-05-07T23:11:37.835Z",
+      "helped": [
+        "Ninguno"
+      ],
+      "would_improve": "",
+      "missing_product": ""
+    },
+    {
+      "id": "50a2ad95-6f19-4099-beb4-c3e7d6633cf6",
+      "survey_id": "40a82446-9535-4df7-b6ef-88ae23c1d20b",
+      "created_at": "2026-05-07T23:12:04.859Z",
+      "rating": 1,
+      "updated_at": "2026-05-07T23:12:15.326Z"
+    },
+    {
+      "id": "346c8d69-8f3c-4ffe-b376-9e7813970143",
+      "survey_id": "40a82446-9535-4df7-b6ef-88ae23c1d20b",
+      "created_at": "2026-05-07T23:12:48.101Z",
+      "rating": 3,
+      "updated_at": "2026-05-07T23:15:47.900Z",
+      "failed_category": "Calidad",
+      "failed": "Tiempo, Costo, Calidad",
+      "failed_categories": [
+        "Tiempo",
+        "Costo",
+        "Calidad"
+      ],
+      "wants_contact": false
+    },
+    {
+      "id": "135e3f35-d7f9-480d-9acb-7e564d283aa8",
+      "survey_id": "40a82446-9535-4df7-b6ef-88ae23c1d20b",
+      "created_at": "2026-05-07T23:20:20.130Z",
+      "rating": 2,
+      "updated_at": "2026-05-07T23:20:29.277Z",
+      "failed_categories": [
+        "Costo",
+        "Tiempo",
+        "Calidad"
+      ],
+      "failed": "Costo, Tiempo, Calidad",
+      "wants_contact": false
+    },
+    {
+      "id": "7ea8f5ab-d1be-4dbf-a31d-198d6406d3c5",
+      "survey_id": "40a82446-9535-4df7-b6ef-88ae23c1d20b",
+      "created_at": "2026-05-07T23:21:20.537Z"
+    }
+  ]
+}
