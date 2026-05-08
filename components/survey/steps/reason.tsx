@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { Check } from "lucide-react";
 
 interface ReasonViewProps {
   onNext: (reason: string) => void;
@@ -17,26 +17,43 @@ const REASONS = [
 ];
 
 export function ReasonView({ onNext }: ReasonViewProps) {
+  const [selected, setSelected] = useState<string>("");
+
   return (
-    <div className="flex flex-col items-center justify-center w-full px-6 gap-8 max-w-sm mx-auto">
-      <div className="text-center">
-        <h2 className="survey-title !text-center !text-[32px]">
+    <div className="flex flex-col items-center justify-center w-full gap-10 max-w-md mx-auto">
+      <div className="text-center space-y-4">
+        <h2 className="survey-title !text-center">
           De estas opciones cual sería la razón por la que no lo producimos para ti
         </h2>
       </div>
 
-      <div className="flex flex-col gap-2.5 w-full">
-        {REASONS.map((reason) => (
-          <button
-            key={reason}
-            onClick={() => onNext(reason)}
-            className="flex items-center justify-between w-full bg-gray-50 text-black font-bold py-4 px-5 rounded-2xl hover:bg-gray-100 transition-all border-2 border-transparent hover:border-gray-200 group text-left"
-          >
-            <span className="text-sm leading-tight font-bold">{reason}</span>
-            <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-black transition-colors shrink-0" />
-          </button>
-        ))}
+      <div className="flex flex-col gap-3 w-full">
+        {REASONS.map((opt) => {
+          const isSelected = selected === opt;
+          return (
+            <button
+              key={opt}
+              onClick={() => setSelected(opt)}
+              className={`flex items-center justify-between px-6 py-4 rounded-2xl font-bold text-base transition-all border-2 ${
+                isSelected 
+                  ? "bg-guinda border-guinda text-white shadow-lg shadow-guinda/20" 
+                  : "bg-white border-gray-100 text-gray-600 hover:border-guinda/30 hover:bg-guinda/[0.02]"
+              }`}
+            >
+              <span className="truncate mr-2">{opt}</span>
+              {isSelected && <Check className="w-4 h-4 shrink-0" />}
+            </button>
+          );
+        })}
       </div>
+
+      <button
+        onClick={() => onNext(selected)}
+        disabled={!selected}
+        className="btn-premium w-full py-5 rounded-2xl text-lg disabled:opacity-30 disabled:pointer-events-none"
+      >
+        Continuar
+      </button>
     </div>
   );
 }

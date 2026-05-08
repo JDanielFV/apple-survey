@@ -60,7 +60,7 @@
   .survey-title {
     font-family: 'Montserrat';
     font-weight: 800;
-    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-size: clamp(1.5rem, 6vw, 2.75rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
     color: #1A1A1A;
@@ -73,15 +73,15 @@
   .survey-body {
     font-family: 'Montserrat';
     font-weight: 400;
-    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-size: clamp(1rem, 4vw, 1.5rem);
     line-height: 1.5;
     color: #4A4A4A;
-  }k
+  }
 
   .survey-light {
     font-family: 'Montserrat';
     font-weight: 300;
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-size: clamp(0.9rem, 3vw, 1.25rem);
     color: #666666;
   }
 

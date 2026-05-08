@@ -15,23 +15,23 @@ const OPTIONS = [
     id: "whatsapp",
     label: "Whatsapp",
     icon: MessageCircle,
-    detailPlaceholder: "Tu número de Whatsapp (10 dígitos)",
+    detailPlaceholder: "Número a 10 dígitos",
     detailLabel: "Número",
     detailType: "tel" as const,
     hasSchedule: true,
-    validation: (val: string) => /^\d{10,}$/.test(val.replace(/\s/g, "")),
-    errorMsg: "Por favor ingresa 10 números",
+    validation: (val: string) => /^\d{10}$/.test(val.replace(/\s/g, "")),
+    errorMsg: "Ingresa exactamente 10 números",
   },
   {
     id: "llamada",
     label: "Llamada",
     icon: Phone,
-    detailPlaceholder: "Tu número de teléfono (10 dígitos)",
+    detailPlaceholder: "Número a 10 dígitos",
     detailLabel: "Teléfono",
     detailType: "tel" as const,
     hasSchedule: true,
-    validation: (val: string) => /^\d{10,}$/.test(val.replace(/\s/g, "")),
-    errorMsg: "Por favor ingresa 10 números",
+    validation: (val: string) => /^\d{10}$/.test(val.replace(/\s/g, "")),
+    errorMsg: "Ingresa exactamente 10 números",
   },
   {
     id: "correo",
@@ -157,11 +157,12 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
                         <input
                           type={detailType}
                           inputMode={detailType === "tel" ? "numeric" : "email"}
+                          maxLength={detailType === "tel" ? 10 : undefined}
                           value={detail}
                           onChange={(e) => {
                             const val = e.target.value;
                             if (detailType === "tel") {
-                              const numericValue = val.replace(/\D/g, "");
+                              const numericValue = val.replace(/\D/g, "").slice(0, 10);
                               setDetail(numericValue);
                             } else {
                               setDetail(val);

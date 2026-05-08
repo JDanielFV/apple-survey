@@ -7,8 +7,6 @@ import {
   ExternalLink, 
   Clipboard, 
   Check, 
-  BarChart3, 
-  MessageSquare, 
   Star,
   RefreshCw,
   FileText,
@@ -18,7 +16,11 @@ import {
   Clock,
   HelpCircle,
   MessageCircle,
-  ShieldCheck
+  ShieldCheck,
+  ArrowDownCircle,
+  Inbox,
+  BarChart3,
+  MessageSquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -52,7 +54,9 @@ export default function DashboardPage() {
     }
   };
 
-  // Función para generar un código aleatorio de 16 caracteres
+  // Enlaces que NO tienen respuesta aún
+  const pendingSurveys = surveys.filter(s => !responses.some(r => r.survey_id === s.id));
+
   const generateSecureCode = () => {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let code = "";
@@ -62,12 +66,11 @@ export default function DashboardPage() {
     return code;
   };
 
-  // Función para limpiar texto (quitar acentos, eñes, etc.)
   const cleanName = (text: string) => {
     return text
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Quita acentos
-      .replace(/[^a-zA-Z0-9\s]/g, "") // Quita símbolos especiales
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9\s]/g, "")
       .trim();
   };
 
@@ -80,8 +83,6 @@ export default function DashboardPage() {
 
   const createSurvey = async () => {
     if (!newSurveyName) return;
-    
-    // El nombre se guarda limpio, pero el slug es un código de 16 chars
     const slug = generateSecureCode();
     const finalName = cleanName(newSurveyName);
 
@@ -96,290 +97,199 @@ export default function DashboardPage() {
         setShowCreateModal(false);
         setNewSurveyName("");
         fetchData();
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error}`);
       }
     } catch (e) {
       console.error("Error creating survey", e);
-      alert("Error de conexión");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6 md:p-10 font-[Montserrat]">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50/50 font-[Montserrat]">
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
         
-        {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-          <div className="flex items-center gap-4">
-            <div className="bg-black p-2 rounded-xl text-white flex items-center justify-center font-black italic">
+        {/* Header Compacto */}
+        <header className="flex items-center justify-between gap-4 mb-10">
+          <div className="flex items-center gap-3">
+            <div className="bg-black p-2.5 rounded-xl text-white flex items-center justify-center font-black italic text-sm">
               A&G
             </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-black">A&G Feedback Dashboard</h1>
-              <p className="text-gray-500 text-sm">Gestiona tus enlaces y revisa la satisfacción del cliente</p>
-            </div>
+            <h1 className="text-xl font-black tracking-tight text-black">Survey Console</h1>
           </div>
           
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 bg-black text-white px-5 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-95 text-sm"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             Nuevo Enlace
           </button>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Unified Scroll Area Content */}
+        <div className="flex flex-col gap-10">
           
-          {/* Left Column: Surveys List */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-black text-lg flex items-center gap-2">
-                  <LinkIcon className="w-5 h-5 text-gray-400" />
-                  Enlaces Activos
-                </h2>
-                <button onClick={fetchData} className="text-gray-400 hover:text-black transition-colors">
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
+          {/* SECCIÓN 1: ENLACES PENDIENTES */}
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <LinkIcon className="w-3 h-3" />
+                Enlaces por responder ({pendingSurveys.length})
+              </h2>
+              <button onClick={fetchData} className="text-gray-400 hover:text-black transition-colors">
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
 
-              <div className="flex flex-col gap-3">
-                {surveys.length === 0 && !loading ? (
-                  <p className="text-gray-400 text-sm text-center py-10 italic">No hay enlaces generados aún.</p>
-                ) : (
-                  surveys.map((survey) => (
-                    <div key={survey.id} className="group p-4 rounded-2xl border border-gray-50 bg-gray-50/50 hover:bg-white hover:border-gray-200 transition-all">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-bold text-black">{survey.name}</span>
-                        <div className="flex gap-1">
-                          <button 
-                            onClick={() => copyLink(survey.slug)}
-                            className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
-                          >
-                            {copiedId === survey.slug ? <Check className="w-4 h-4 text-green-500" /> : <Clipboard className="w-4 h-4" />}
-                          </button>
-                          <a 
-                            href={`/survey/${survey.slug}`} 
-                            target="_blank"
-                            className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <AnimatePresence mode="popLayout">
+                {pendingSurveys.map((survey) => (
+                  <motion.div 
+                    key={survey.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="bg-white border border-gray-100 p-4 rounded-3xl shadow-sm hover:border-guinda/20 transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-bold text-black text-sm">{survey.name}</span>
+                      <code className="text-[9px] text-gray-400 font-mono mt-1 uppercase tracking-tighter">Code: {survey.slug.slice(0,8)}...</code>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => copyLink(survey.slug)}
+                        className={`p-2.5 rounded-xl transition-all ${copiedId === survey.slug ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400 hover:text-black hover:bg-gray-100'}`}
+                      >
+                        {copiedId === survey.slug ? <Check className="w-4 h-4" /> : <Clipboard className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              
+              {pendingSurveys.length === 0 && (
+                <div className="col-span-full py-8 border-2 border-dashed border-gray-100 rounded-[32px] flex flex-col items-center justify-center text-gray-400 gap-2">
+                  <Inbox className="w-6 h-6 opacity-20" />
+                  <p className="text-xs font-bold italic">No hay enlaces pendientes</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* DIVIDER VISUAL */}
+          <div className="flex items-center gap-4 px-2">
+            <div className="h-px bg-gray-100 flex-1" />
+            <ArrowDownCircle className="w-4 h-4 text-gray-200" />
+            <div className="h-px bg-gray-100 flex-1" />
+          </div>
+
+          {/* SECCIÓN 2: RESPUESTAS RECIBIDAS */}
+          <section className="flex flex-col gap-4">
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2 px-2">
+              <FileText className="w-3 h-3" />
+              Reportes Recibidos ({responses.length})
+            </h2>
+
+            <div className="flex flex-col gap-3">
+              {responses.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((resp) => {
+                const survey = surveys.find(s => s.id === resp.survey_id);
+                return (
+                  <motion.div 
+                    key={resp.id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-white border border-gray-100 p-5 rounded-[32px] shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center shrink-0 ${resp.rating >= 4 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <span className="text-lg font-black leading-none">{resp.rating}</span>
+                        <Star className="w-3 h-3 fill-current" />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-green-500" />
-                        <code className="text-[10px] text-gray-400 font-mono">{survey.slug}</code>
+                      <div className="flex flex-col">
+                        <span className="font-black text-black">{survey?.name || '---'}</span>
+                        <p className="text-xs text-gray-400 font-bold truncate max-w-[250px]">
+                          {resp.rating >= 4 ? (resp.would_improve || 'Satisfecho') : (resp.failed || 'Inconforme')}
+                        </p>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
 
-          {/* Right Column: Responses Table */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm h-full overflow-hidden">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-black text-lg flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-gray-400" />
-                  Respuestas Recientes
-                </h2>
-                <div className="flex gap-2">
-                  <div className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                    <BarChart3 className="w-3 h-3" />
-                    {responses.length} Total
-                  </div>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="text-gray-400 text-xs uppercase tracking-wider font-black border-b border-gray-50">
-                      <th className="pb-4 px-4 text-center">Calif.</th>
-                      <th className="pb-4 px-4">Cliente / Enlace</th>
-                      <th className="pb-4 px-4">Detalles</th>
-                      <th className="pb-4 px-4 text-right">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50 text-sm">
-                    {responses.length === 0 && !loading ? (
-                      <tr>
-                        <td colSpan={4} className="py-20 text-center text-gray-400 italic">No hay respuestas registradas.</td>
-                      </tr>
-                    ) : (
-                      responses.map((resp) => {
-                        const survey = surveys.find(s => s.id === resp.survey_id);
-                        return (
-                          <tr key={resp.id} className="group hover:bg-gray-50/50 transition-colors">
-                            <td className="py-4 px-4">
-                              <div className={`flex items-center justify-center gap-0.5 rounded-lg py-1 px-2 w-fit mx-auto ${resp.rating >= 4 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                <span className="font-black">{resp.rating}</span>
-                                <Star className={`w-3 h-3 ${resp.rating >= 4 ? 'fill-green-700' : 'fill-red-700'}`} />
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="font-bold text-black">{survey?.name || '---'}</div>
-                              <div className="text-[10px] text-gray-400 font-mono">ID: {resp.id.slice(0, 8)}</div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="text-gray-500 truncate max-w-[150px]">
-                                {resp.rating >= 4 ? (resp.would_improve || 'Satisfecho') : (resp.failed || 'Inconforme')}
-                              </div>
-                            </td>
-                            <td className="py-4 px-4 text-right">
-                              <button 
-                                onClick={() => setSelectedResponse(resp)}
-                                className="inline-flex items-center gap-2 bg-gray-100 text-black px-4 py-2 rounded-xl text-xs font-black hover:bg-black hover:text-white transition-all active:scale-95"
-                              >
-                                <FileText className="w-3 h-3" />
-                                Ver Reporte
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 pt-3 md:pt-0 border-gray-50">
+                      <div className="flex flex-col items-end">
+                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">Recibido</span>
+                        <span className="text-[11px] font-bold text-gray-500 mt-1">{new Date(resp.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}</span>
+                      </div>
+                      <button 
+                        onClick={() => setSelectedResponse(resp)}
+                        className="bg-gray-50 text-black px-6 py-3 rounded-2xl text-xs font-black hover:bg-black hover:text-white transition-all active:scale-95 flex items-center gap-2"
+                      >
+                        Ver Reporte
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+              
+              {responses.length === 0 && !loading && (
+                <p className="text-gray-400 text-sm text-center py-20 italic">Aún no has recibido respuestas.</p>
+              )}
             </div>
-          </div>
+          </section>
         </div>
 
-        {/* Create Modal */}
+        {/* MODALES (Mantenemos la misma lógica pero con el nuevo estilo) */}
         <AnimatePresence>
           {showCreateModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowCreateModal(false)}
-                className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-              />
-              <motion.div 
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative bg-white rounded-[32px] p-8 w-full max-w-md shadow-2xl border border-gray-100"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="bg-green-100 p-2 rounded-lg">
-                    <ShieldCheck className="w-5 h-5 text-green-600" />
-                  </div>
-                  <h3 className="text-2xl font-black tracking-tight">Nuevo enlace seguro</h3>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowCreateModal(false)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+              <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative bg-white rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="bg-green-100 p-2.5 rounded-xl"><ShieldCheck className="w-6 h-6 text-green-600" /></div>
+                  <h3 className="text-2xl font-black tracking-tight">Nuevo enlace</h3>
                 </div>
-
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">Nombre del Cliente</label>
-                    <input 
-                      type="text" 
-                      placeholder="Ej. Notaría 43 de Cancún"
-                      value={newSurveyName}
-                      onChange={(e) => setNewSurveyName(e.target.value)}
-                      className="w-full bg-gray-50 border-none rounded-2xl p-4 text-black font-bold focus:ring-2 focus:ring-black transition-all"
-                    />
-                    <p className="text-[10px] text-gray-400 px-1 mt-1 italic">Acentos y símbolos se limpiarán automáticamente.</p>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Nombre del Cliente</label>
+                    <input type="text" placeholder="Ej. Notaría 43" value={newSurveyName} onChange={(e) => setNewSurveyName(e.target.value)} className="w-full bg-gray-50 border-none rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all" />
                   </div>
-                  
-                  <div className="bg-gray-50 rounded-2xl p-4 border border-dashed border-gray-200">
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Código de enlace (Auto-generado)</span>
-                    <code className="text-sm font-mono text-black">survey/****************</code>
-                  </div>
-                  
                   <div className="flex gap-3 mt-4">
-                    <button onClick={() => setShowCreateModal(false)} className="flex-1 bg-gray-100 text-black font-black py-4 rounded-2xl">Cancelar</button>
-                    <button onClick={createSurvey} className="flex-1 bg-black text-white font-black py-4 rounded-2xl">Generar Enlace</button>
+                    <button onClick={() => setShowCreateModal(false)} className="flex-1 bg-gray-100 text-black font-black py-4 rounded-2xl text-sm">Cancelar</button>
+                    <button onClick={createSurvey} className="flex-1 bg-black text-white font-black py-4 rounded-2xl text-sm">Generar</button>
                   </div>
                 </div>
               </motion.div>
             </div>
           )}
-        </AnimatePresence>
 
-        {/* Response Report Modal */}
-        <AnimatePresence>
           {selectedResponse && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setSelectedResponse(null)}
-                className="absolute inset-0 bg-black/40 backdrop-blur-md"
-              />
-              <motion.div 
-                initial={{ y: 100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 100, opacity: 0 }}
-                className="relative bg-white rounded-[40px] w-full max-w-2xl max-h-[85vh] shadow-2xl overflow-hidden flex flex-col"
-              >
-                {/* Modal Header */}
-                <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedResponse(null)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+              <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="relative bg-white rounded-[40px] w-full max-w-2xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col">
+                <div className="p-6 md:p-8 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
                   <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-2xl ${selectedResponse.rating >= 4 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                      <FileText className="w-6 h-6" />
-                    </div>
+                    <div className={`p-3 rounded-2xl ${selectedResponse.rating >= 4 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}><FileText className="w-6 h-6" /></div>
                     <div>
-                      <h3 className="text-xl font-black text-black">Detalle de Respuesta</h3>
-                      <p className="text-gray-400 text-xs font-bold flex items-center gap-2">
-                        <Clock className="w-3 h-3" />
-                        {new Date(selectedResponse.created_at).toLocaleString('es-MX')}
-                      </p>
+                      <h3 className="text-lg md:text-xl font-black text-black">Detalle de Respuesta</h3>
+                      <p className="text-gray-400 text-[10px] font-bold flex items-center gap-1.5 mt-1"><Clock className="w-3 h-3" /> {new Date(selectedResponse.created_at).toLocaleString('es-MX')}</p>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => setSelectedResponse(null)}
-                    className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-                  >
-                    <X className="w-5 h-5 text-gray-500" />
-                  </button>
+                  <button onClick={() => setSelectedResponse(null)} className="p-2 bg-gray-100 rounded-full"><X className="w-5 h-5 text-gray-500" /></button>
                 </div>
-
-                {/* Modal Content */}
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50">
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50/50">
                   <div className="flex flex-col gap-6">
-                    
-                    {/* Resumen Superior */}
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Cliente</span>
-                        <div className="flex items-center gap-2 font-black text-lg text-black">
-                          <User className="w-4 h-4 text-black/20" />
-                          {surveys.find(s => s.id === selectedResponse.survey_id)?.name || 'Desconocido'}
-                        </div>
-                      </div>
-                      <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Calificación</span>
-                        <div className="flex items-center gap-1 font-black text-2xl">
-                          {selectedResponse.rating}
-                          <Star className={`w-5 h-5 ${selectedResponse.rating >= 4 ? 'fill-green-500 text-green-500' : 'fill-red-500 text-red-500'}`} />
-                        </div>
-                      </div>
+                      <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm"><span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Cliente</span><div className="font-black text-sm md:text-base text-black truncate">{surveys.find(s => s.id === selectedResponse.survey_id)?.name || 'Desconocido'}</div></div>
+                      <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm flex flex-col items-center text-center"><span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Calificación</span><div className="flex items-center gap-1 font-black text-xl md:text-2xl">{selectedResponse.rating}<Star className={`w-5 h-5 ${selectedResponse.rating >= 4 ? 'fill-green-500 text-green-500' : 'fill-red-500 text-red-500'}`} /></div></div>
                     </div>
-
-                    {/* Detalle de Preguntas en Tarjetas */}
                     <div className="flex flex-col gap-4">
-                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Cuestionario</h4>
-                      
                       {selectedResponse.rating >= 4 ? (
                         <>
                           <DetailCard icon={<HelpCircle className="w-4 h-4"/>} label="¿En qué te ayudamos hoy?" content={selectedResponse.helped?.join(', ')} />
                           <DetailCard icon={<MessageCircle className="w-4 h-4"/>} label="¿Qué podríamos mejorar?" content={selectedResponse.would_improve} />
                           <DetailCard icon={<BarChart3 className="w-4 h-4"/>} label="¿Faltó algún producto?" content={selectedResponse.missing_product} />
-                          {selectedResponse.has_provider && (
-                            <>
-                              <DetailCard icon={<Check className="w-4 h-4"/>} label="¿Ya tiene proveedor para ese producto?" content="Sí" />
-                              <DetailCard icon={<MessageSquare className="w-4 h-4"/>} label="Razón por la que no nos compra" content={selectedResponse.reason} />
-                            </>
-                          )}
+                          {selectedResponse.missing_product && <DetailCard icon={<Check className="w-4 h-4"/>} label="¿Ya tiene proveedor?" content={selectedResponse.has_provider ? "Sí, ya tiene" : "No, está buscando"} />}
+                          {selectedResponse.has_provider && selectedResponse.reason && <DetailCard icon={<MessageSquare className="w-4 h-4"/>} label="Razón por la que no nos compra" content={selectedResponse.reason} />}
+                          {!selectedResponse.has_provider && selectedResponse.missing_product && <DetailCard icon={<User className="w-4 h-4"/>} label="¿Desea ayuda?" content={selectedResponse.wants_contact ? "Sí, requiere asesoría" : "No por ahora"} />}
                         </>
                       ) : (
                         <>
@@ -389,32 +299,16 @@ export default function DashboardPage() {
                         </>
                       )}
                     </div>
-
-                    {/* Tarjeta de Contacto */}
-                    <div className="bg-black text-white rounded-[32px] p-8 mt-4">
-                      <div className="flex items-center gap-3 mb-6">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <h4 className="text-sm font-black uppercase tracking-widest">Información de Seguimiento</h4>
-                      </div>
+                    <div className="bg-black text-white rounded-[32px] p-6 md:p-8 mt-4">
+                      <div className="flex items-center gap-3 mb-8"><Calendar className="w-5 h-5 text-gray-500" /><h4 className="text-[10px] font-black uppercase tracking-widest">Seguimiento</h4></div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Medio</span>
-                          <p className="font-bold capitalize">{selectedResponse.contact_method || 'Ninguno'}</p>
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Detalle</span>
-                          <p className="font-bold">{selectedResponse.contact_detail || '---'}</p>
-                        </div>
-                        <div className="md:col-span-2">
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Horario de Preferencia</span>
-                          <p className="font-bold">{selectedResponse.contact_schedule || 'No especificado'}</p>
-                        </div>
+                        <div><span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block">Medio</span><p className="font-bold capitalize text-sm">{selectedResponse.contact_method || 'Ninguno'}</p></div>
+                        <div><span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block">Detalle</span><p className="font-bold text-sm truncate">{selectedResponse.contact_detail || '---'}</p></div>
+                        <div className="md:col-span-2"><span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block">Horario</span><p className="font-bold text-sm leading-relaxed">{selectedResponse.contact_schedule || 'No especificado'}</p></div>
                       </div>
                     </div>
-
                   </div>
                 </div>
-
               </motion.div>
             </div>
           )}
@@ -427,12 +321,9 @@ export default function DashboardPage() {
 
 function DetailCard({ icon, label, content }: { icon: React.ReactNode, label: string, content?: string }) {
   return (
-    <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <div className="text-black/20">{icon}</div>
-        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</span>
-      </div>
-      <p className="text-black font-bold text-lg leading-snug">{content || '_Sin respuesta_'}</p>
+    <div className="bg-white rounded-[24px] p-5 md:p-6 border border-gray-100 shadow-sm flex flex-col gap-3">
+      <div className="flex items-center gap-2"><div className="text-guinda/30 shrink-0">{icon}</div><span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{label}</span></div>
+      <p className="text-black font-bold text-sm md:text-base leading-snug">{content || '_Sin respuesta_'}</p>
     </div>
   );
 }

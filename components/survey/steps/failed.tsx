@@ -1,105 +1,79 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
+import { Check } from "lucide-react";
 
 interface FailedViewProps {
-  onNext: (data: { failed_categories: string[], failed: string }) => void;
+  onNext: (categories: string[], detail: string) => void;
 }
 
-const CATEGORIES = ["Tiempo", "Costo", "Calidad", "Otro"];
+const CATEGORIES = [
+  "Costo",
+  "Atención",
+  "Calidad",
+  "Tiempo",
+  "Disponibilidad",
+  "Otro"
+];
 
 export function FailedView({ onNext }: FailedViewProps) {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [comment, setComment] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [detail, setDetail] = useState("");
 
-  const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(cat) 
-        ? prev.filter(c => c !== cat) 
-        : [...prev, cat]
+  const toggle = (cat: string) => {
+    setSelected(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
 
-  const handleNext = () => {
-    // Generamos el texto de falla basado en las categorías seleccionadas
-    let failedText = "";
-    if (selectedCategories.includes("Otro")) {
-      // Si eligió 'Otro', el texto principal es el comentario, 
-      // pero incluimos las otras categorías si las hay
-      const otherCats = selectedCategories.filter(c => c !== "Otro");
-      failedText = otherCats.length > 0 
-        ? `${otherCats.join(", ")} | Detalle: ${comment}`
-        : comment;
-    } else {
-      failedText = selectedCategories.join(", ");
-    }
-
-    onNext({ 
-      failed_categories: [...selectedCategories], 
-      failed: failedText 
-    });
-  };
-
-  const hasOtro = selectedCategories.includes("Otro");
-  const canContinue = selectedCategories.length > 0 && (!hasOtro || comment.trim().length > 0);
-
   return (
-    <div className="flex flex-col items-center justify-center w-full px-6 gap-8 max-w-sm mx-auto">
+    <div className="flex flex-col items-center justify-center w-full gap-8 max-w-md mx-auto">
       <div className="text-center space-y-4">
-        <h2 className="survey-title !text-center !text-[32px]">
-          Lamentamos que tu experiencia no haya sido la mejor. <br />
-          ¿En qué te hemos fallado?
+        <h2 className="survey-title !text-center">
+          Lamentamos que tu experiencia no haya sido la mejor. <br /> ¿En qué te hemos fallado?
         </h2>
-        <p className="survey-light !text-[18px]">
-          Puedes seleccionar varias opciones
-        </p>
+        <p className="survey-light">Puedes seleccionar varias opciones</p>
       </div>
 
-      <div className="flex flex-wrap gap-2 w-full justify-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
         {CATEGORIES.map((cat) => {
-          const isSelected = selectedCategories.includes(cat);
+          const isSelected = selected.includes(cat);
           return (
             <button
               key={cat}
-              onClick={() => toggleCategory(cat)}
-              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all border-2 ${
+              onClick={() => toggle(cat)}
+              className={`flex items-center justify-between px-6 py-4 rounded-2xl font-bold text-base transition-all border-2 ${
                 isSelected 
-                  ? "bg-black border-black text-white" 
-                  : "bg-gray-50 border-gray-50 text-gray-400 hover:border-gray-200"
+                  ? "bg-guinda border-guinda text-white shadow-lg shadow-guinda/20" 
+                  : "bg-white border-gray-100 text-gray-600 hover:border-guinda/30 hover:bg-guinda/[0.02]"
               }`}
             >
-              {cat}
+              <span className="truncate mr-2">{cat}</span>
+              {isSelected && <Check className="w-4 h-4 shrink-0" />}
             </button>
           );
         })}
       </div>
 
-      <AnimatePresence>
-        {hasOtro && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="w-full overflow-hidden"
-          >
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Cuéntanos más sobre tu experiencia..."
-              className="w-full h-40 bg-gray-50 border-2 border-black rounded-[32px] p-6 text-black font-bold placeholder:text-gray-300 focus:bg-white outline-none transition-all resize-none mt-2"
-              autoFocus
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="flex flex-col gap-2 w-full">
+        <label className="text-[10px] font-black text-guinda/60 uppercase tracking-widest px-1">
+          Detalles adicionales (Opcional)
+        </label>
+        <textarea
+          value={detail}
+          onChange={(e) => setDetail(e.target.value)}
+          placeholder="Escribe aquí..."
+          className="w-full bg-white border border-gray-100 rounded-2xl p-5 text-base font-bold focus:ring-4 focus:ring-guinda/5 focus:border-guinda/30 transition-all outline-none min-h-[120px] resize-none"
+        />
+      </div>
 
       <button
-        onClick={handleNext}
-        disabled={!canContinue}
-        className="w-full bg-black text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-black/10 disabled:opacity-30 disabled:shadow-none transition-all active:scale-95 mt-4"
+        onClick={() => onNext(selected, detail)}
+        disabled={selected.length === 0 && detail.length === 0}
+        className="btn-premium w-full py-5 rounded-2xl text-lg disabled:opacity-30 disabled:pointer-events-none"
       >
-        Continuar
+        Enviar Comentarios
       </button>
     </div>
   );

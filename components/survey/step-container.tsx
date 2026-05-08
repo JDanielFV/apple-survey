@@ -11,19 +11,19 @@ interface StepContainerProps {
 
 const variants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 50 : -50,
+    y: direction > 0 ? 40 : -40,
     opacity: 0,
     scale: 0.98
   }),
   center: {
     zIndex: 1,
-    x: 0,
+    y: 0,
     opacity: 1,
     scale: 1
   },
   exit: (direction: number) => ({
     zIndex: 0,
-    x: direction < 0 ? 50 : -50,
+    y: direction < 0 ? 40 : -40,
     opacity: 0,
     scale: 0.98
   })
@@ -46,7 +46,7 @@ export function StepContainer({ children, stepId, direction }: StepContainerProp
           animate="center"
           exit="exit"
           transition={{
-            x: { type: "spring", stiffness: 400, damping: 40 },
+            y: { type: "spring", stiffness: 400, damping: 40 },
             opacity: { duration: 0.3 },
             scale: { duration: 0.4 }
           }}

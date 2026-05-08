@@ -1,15 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import Image from "next/image";
 import { useState, useEffect } from "react";
 
 interface SplashViewProps {
   onStart: () => void;
+  surveyName?: string;
 }
 
-export function SplashView({ onStart }: SplashViewProps) {
+export function SplashView({ onStart, surveyName }: SplashViewProps) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -43,61 +44,68 @@ export function SplashView({ onStart }: SplashViewProps) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={handleClick}
-      className={`flex flex-col h-[100dvh] w-full bg-white select-none touch-none ${!isMobile ? 'cursor-pointer' : ''}`}
+      className={`flex flex-col items-center justify-center w-full min-h-[100dvh] gap-12 text-center select-none touch-none ${!isMobile ? 'cursor-pointer' : ''}`}
     >
-      {/* Upper Content - Left Aligned inside a max-w container */}
-      <div className="flex-1 flex flex-col justify-start pt-24 px-10 md:px-20 max-w-4xl mx-auto w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="space-y-4"
-        >
-          <h1 className="survey-title">
-            Gracias por dejarnos formar parte de tu camino
-          </h1>
-          
-          <div className="survey-divider" />
-          
-          <p className="survey-body">
-            Trabajando con los mejores
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative"
+      >
+        <div className="absolute inset-0 bg-guinda/10 blur-[60px] rounded-full scale-150" />
+        <Image
+          src="/logo-cg.webp"
+          alt="A&G"
+          width={180}
+          height={180}
+          priority
+          className="relative z-10 w-[140px] md:w-[180px] h-auto animate-float"
+        />
+      </motion.div>
+
+      <div className="space-y-4 relative z-10">
+        <h1 className="survey-title !text-center px-4">
+          Gracias por dejarnos formar parte de tu camino
+        </h1>
+        <p className="survey-body">
+          Trabajando con los mejores
+        </p>
+        {surveyName && (
+          <p className="survey-light text-guinda font-bold uppercase tracking-[0.3em] text-[10px] mt-2">
+            {surveyName}
           </p>
-        </motion.div>
+        )}
       </div>
 
-      {/* Lower Content - Center Aligned */}
-      <div className="flex flex-col items-center gap-12 pb-16 px-10">
+      {/* Botón: Solo visible en Desktop */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        onClick={onStart}
+        className="hidden md:flex btn-premium w-full max-w-xs py-5 rounded-2xl text-lg relative z-10 shadow-2xl active:scale-95 transition-all justify-center"
+      >
+        Empezar Encuesta
+      </motion.button>
+      
+      {/* Indicadores: Solo visibles en Móvil o como apoyo visual */}
+      <div className="space-y-3 text-center">
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Tomará unos segundos</p>
+        <p className="text-[10px] font-black text-guinda uppercase tracking-[0.2em] animate-pulse">
+          {isMobile ? "Desliza para continuar" : "Haz clic para continuar"}
+        </p>
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="flex flex-col items-center gap-8"
-        >
-          <Image
-            src="/logo-cg.webp"
-            alt="A&G Papelería Notarial & Corporativa"
-            width={180}
-            height={90}
-            priority
-            className="mb-2"
-            style={{ height: "auto" }}
-          />
-          
-          <div className="space-y-3 text-center">
-            <p className="survey-light font-medium">Tomará unos segundos</p>
-            <p className="survey-light font-black tracking-tight">
-              {isMobile ? "Desliza para continuar" : "Haz clic para continuar"}
-            </p>
-          </div>
-        </motion.div>
-
-        <motion.div
-          animate={{ y: [0, 12, 0] }}
+          animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="flex justify-center mt-2"
         >
-          <ChevronDown className="w-12 h-12 text-black/20" strokeWidth={3} />
+          <ChevronDown className="w-8 h-8 text-guinda/30" strokeWidth={3} />
         </motion.div>
       </div>
+
+      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] opacity-40 absolute bottom-8">
+        © A&G Papelería Notarial
+      </p>
     </div>
   );
 }

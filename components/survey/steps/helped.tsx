@@ -23,35 +23,48 @@ export function HelpedView({ onNext }: HelpedViewProps) {
   const [selected, setSelected] = useState<string[]>([]);
 
   const toggle = (opt: string) => {
-    setSelected(prev => 
-      prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]
-    );
+    const isExclusive = opt === "No necesariamente" || opt === "Otro";
+
+    setSelected(prev => {
+      // Si ya está seleccionada, simplemente la quitamos
+      if (prev.includes(opt)) {
+        return prev.filter(i => i !== opt);
+      }
+
+      // Si es una opción exclusiva, limpia todo lo demás y solo deja esta
+      if (isExclusive) {
+        return [opt];
+      }
+
+      // Si es una opción normal, nos aseguramos de quitar las exclusivas si estaban activas
+      return [...prev.filter(i => i !== "No necesariamente" && i !== "Otro"), opt];
+    });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full px-6 gap-10 max-w-md mx-auto">
+    <div className="flex flex-col items-center justify-center w-full gap-10 max-w-md mx-auto">
       <div className="text-center space-y-4">
-        <h2 className="survey-title !text-center !text-[32px]">
+        <h2 className="survey-title !text-center">
           ¿Te hemos ayudado en algo?
         </h2>
-        <p className="survey-light !text-[18px]">Selecciona una o varias opciones</p>
+        <p className="survey-light">Selecciona una o varias opciones</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
         {OPTIONS.map((opt) => {
           const isSelected = selected.includes(opt);
           return (
             <button
               key={opt}
               onClick={() => toggle(opt)}
-              className={`flex items-center justify-between px-5 py-4 rounded-2xl font-bold text-sm transition-all border-2 ${
+              className={`flex items-center justify-between px-6 py-4 rounded-2xl font-bold text-base transition-all border-2 ${
                 isSelected 
-                  ? "bg-black border-black text-white" 
-                  : "bg-gray-50 border-gray-50 text-black hover:border-gray-200"
+                  ? "bg-guinda border-guinda text-white shadow-lg shadow-guinda/20" 
+                  : "bg-white border-gray-100 text-gray-600 hover:border-guinda/30 hover:bg-guinda/[0.02]"
               }`}
             >
-              {opt}
-              {isSelected && <Check className="w-4 h-4" />}
+              <span className="truncate mr-2">{opt}</span>
+              {isSelected && <Check className="w-4 h-4 shrink-0" />}
             </button>
           );
         })}
@@ -60,7 +73,7 @@ export function HelpedView({ onNext }: HelpedViewProps) {
       <button
         onClick={() => onNext(selected)}
         disabled={selected.length === 0}
-        className="w-full bg-black text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-black/10 disabled:opacity-30 disabled:shadow-none transition-all active:scale-95"
+        className="btn-premium w-full py-5 rounded-2xl text-lg disabled:opacity-30 disabled:pointer-events-none"
       >
         Continuar
       </button>
