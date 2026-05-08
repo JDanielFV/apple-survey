@@ -22,9 +22,22 @@ export function FailedView({ onNext }: FailedViewProps) {
   };
 
   const handleNext = () => {
+    // Generamos el texto de falla basado en las categorías seleccionadas
+    let failedText = "";
+    if (selectedCategories.includes("Otro")) {
+      // Si eligió 'Otro', el texto principal es el comentario, 
+      // pero incluimos las otras categorías si las hay
+      const otherCats = selectedCategories.filter(c => c !== "Otro");
+      failedText = otherCats.length > 0 
+        ? `${otherCats.join(", ")} | Detalle: ${comment}`
+        : comment;
+    } else {
+      failedText = selectedCategories.join(", ");
+    }
+
     onNext({ 
-      failed_categories: selectedCategories, 
-      failed: selectedCategories.includes("Otro") ? comment : selectedCategories.join(", ")
+      failed_categories: [...selectedCategories], 
+      failed: failedText 
     });
   };
 
@@ -35,7 +48,8 @@ export function FailedView({ onNext }: FailedViewProps) {
     <div className="flex flex-col items-center justify-center w-full px-6 gap-8 max-w-sm mx-auto">
       <div className="text-center space-y-4">
         <h2 className="survey-title !text-center !text-[32px]">
-          ¿En que te hemos fallado?
+          Lamentamos que tu experiencia no haya sido la mejor. <br />
+          ¿En qué te hemos fallado?
         </h2>
         <p className="survey-light !text-[18px]">
           Puedes seleccionar varias opciones

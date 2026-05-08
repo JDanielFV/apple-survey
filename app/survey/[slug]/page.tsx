@@ -1,159 +1,136 @@
 "use client";
 
-import { use, useEffect, useState, useRef } from "react";
+import { useEffect, useState, use } from "react";
 import { useSurvey } from "@/hooks/use-survey";
 import { StepContainer } from "@/components/survey/step-container";
 import { SplashView } from "@/components/survey/steps/splash";
 import { RatingView } from "@/components/survey/steps/rating";
 import { HonestyView } from "@/components/survey/steps/honesty";
-
-// Path A
 import { HelpedView } from "@/components/survey/steps/helped";
+import { FailedView } from "@/components/survey/steps/failed";
 import { WouldImproveView } from "@/components/survey/steps/would-improve";
 import { MissingProductView } from "@/components/survey/steps/missing-product";
 import { HasProviderView } from "@/components/survey/steps/has-provider";
 import { ReasonView } from "@/components/survey/steps/reason";
-import { PositiveAcknowledgmentView } from "@/components/survey/steps/positive-acknowledgment";
-import { CatalogView } from "@/components/survey/steps/catalog";
-
-// Path B
-import { FailedView } from "@/components/survey/steps/failed";
-import { AcknowledgmentView } from "@/components/survey/steps/acknowledgment";
 import { ContactMethodView } from "@/components/survey/steps/contact-method";
+import { PositiveAcknowledgmentView } from "@/components/survey/steps/positive-acknowledgment";
+import { AcknowledgmentView } from "@/components/survey/steps/acknowledgment";
+import { CatalogView } from "@/components/survey/steps/catalog";
 import { WorkingView } from "@/components/survey/steps/working";
 import { UnderstoodView } from "@/components/survey/steps/understood";
-
-import { ChevronLeft, Loader2 } from "lucide-react";
-
-const BACK_VISIBLE: string[] = [
-  "rating", "honesty", "helped", "would_improve", "missing_product", "has_provider", "reason",
-  "failed", "acknowledgment", "contact_method",
-];
-
-const PATH_A = ["rating", "honesty", "helped", "would_improve", "missing_product", "has_provider", "reason", "catalog"];
-const PATH_B = ["rating", "honesty", "failed", "acknowledgment", "contact_method", "working", "understood"];
+import { ExpiredView } from "@/components/survey/steps/expired";
+import { ChevronLeft } from "lucide-react";
 
 export default function SurveyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const decodedSlug = decodeURIComponent(slug);
-  
-  const { step, next, back, direction, isEndStep, isGoodPath, answers } = useSurvey();
+  const { step, answers, next, back, direction, isEndStep } = useSurvey();
   const [surveyId, setSurveyId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isExpired, setIsExpired] = useState(false);
   const [responseId, setResponseId] = useState<string | null>(null);
-  const [isValid, setIsValid] = useState<boolean | null>(null);
-  
-  const lastSavedStep = useRef<string | null>(null);
 
   useEffect(() => {
-    const validateSurvey = async () => {
+    async function fetchSurvey() {
       try {
-        const res = await fetch('/api/surveys');
+        const res = await fetch(`/api/surveys`);
         const data = await res.json();
-        const survey = data.surveys.find((s: any) => 
-          s.slug === slug || s.slug === decodedSlug
-        );
+        const survey = data.surveys.find((s: any) => s.slug === slug);
+        
         if (survey) {
-          setSurveyId(survey.id);
-          setIsValid(true);
-        } else {
-          setIsValid(false);
+          if (survey.is_completed) {
+            setIsExpired(true);
+          } else {
+            setSurveyId(survey.id);
+          }
         }
       } catch (e) {
-        setIsValid(false);
+        console.error("Error fetching survey", e);
+      } finally {
+        setLoading(false);
       }
-    };
-    validateSurvey();
-  }, [slug, decodedSlug]);
+    }
+    fetchSurvey();
+  }, [slug]);
 
+  // Guardar progreso paso a paso (Upsert)
   useEffect(() => {
-    if (!surveyId || step === "splash" || step === "honesty" || lastSavedStep.current === step) return;
+    if (!surveyId || step === 'splash' || isExpired) return;
 
     const saveProgress = async () => {
       try {
+        // Limpiamos answers para asegurar que no haya objetos circulares
+        const cleanAnswers = JSON.parse(JSON.stringify(answers));
+        
         const res = await fetch('/api/responses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: responseId || undefined,
             survey_id: surveyId,
-            ...answers
+            ...cleanAnswers
           })
         });
         const data = await res.json();
-        if (!responseId) setResponseId(data.id);
-        lastSavedStep.current = step;
+        if (data.id) setResponseId(data.id);
+
+        // Si es el paso final, marcamos la encuesta como completada
+        if (isEndStep) {
+          await fetch('/api/surveys', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: surveyId, is_completed: true })
+          });
+        }
       } catch (e) {
         console.error("Error saving progress", e);
       }
     };
 
     saveProgress();
-  }, [step, surveyId, responseId, answers]);
+  }, [step, surveyId, answers, responseId, isEndStep, isExpired]);
 
-  if (isValid === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-200" />
-      </div>
-    );
-  }
+  if (loading) return null;
+  if (isExpired) return (
+    <StepContainer stepId="expired" direction={0}>
+      <ExpiredView />
+    </StepContainer>
+  );
+  if (!surveyId) return <div className="p-10 text-center font-[Montserrat]">Encuesta no encontrada</div>;
 
-  if (isValid === false) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-white font-[Montserrat]">
-        <h1 className="text-2xl font-black mb-2">Enlace no válido</h1>
-        <p className="text-gray-500">Esta encuesta no existe o ha sido desactivada.</p>
-      </div>
-    );
-  }
-
-  const progressSteps = step === "splash" || step === "honesty" ? [] : isGoodPath ? PATH_A : PATH_B;
-  const currentIdx = progressSteps.indexOf(step);
+  const showBack = step !== "splash" && !isEndStep;
 
   return (
-    <main className="min-h-[100dvh] flex flex-col relative w-full overflow-hidden bg-white">
-      {BACK_VISIBLE.includes(step) && (
-        <div className="absolute top-6 left-4 z-10">
-          <button onClick={back} className="flex items-center gap-1 text-gray-400 hover:text-black transition-colors px-2 py-1 rounded-xl">
-            <ChevronLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Volver</span>
-          </button>
-        </div>
+    <div className="relative min-h-screen bg-white font-[Montserrat]">
+      {showBack && (
+        <button 
+          onClick={() => back()}
+          className="absolute top-8 left-8 z-50 p-2 text-black/20 hover:text-black transition-colors"
+        >
+          <ChevronLeft className="w-8 h-8" />
+        </button>
       )}
 
-      {step !== "splash" && step !== "honesty" && !isEndStep && progressSteps.length > 0 && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-          {progressSteps.map((s, i) => (
-            <div key={s} className={`h-1 rounded-full transition-all duration-500 ${i === currentIdx ? "w-6 bg-black" : i < currentIdx ? "w-3 bg-black/40" : "w-3 bg-gray-200"}`} />
-          ))}
-        </div>
-      )}
+      <StepContainer stepId={step} direction={direction}>
+        {step === "splash" && <SplashView onStart={() => next()} />}
+        {step === "rating" && <RatingView onSelect={(rating: number) => next({ rating })} />}
+        {step === "honesty" && <HonestyView onNext={() => next()} />}
+        
+        {/* PATH A */}
+        {step === "helped" && <HelpedView onNext={(helped: string[]) => next({ helped })} />}
+        {step === "would_improve" && <WouldImproveView onNext={(would_improve: string) => next({ would_improve })} />}
+        {step === "missing_product" && <MissingProductView onAnswer={(missing_product: string) => next({ missing_product })} />}
+        {step === "has_provider" && <HasProviderView onAnswer={(has_provider: boolean) => next({ has_provider })} />}
+        {step === "reason" && <ReasonView onNext={(reason: string) => next({ reason })} />}
+        {step === "positive_acknowledgment" && <PositiveAcknowledgmentView onNext={() => next()} />}
+        {step === "catalog" && <CatalogView />}
 
-      <div className={`flex-1 flex ${step === "splash" || step === "honesty" ? "" : "items-center"}`}>
-        <StepContainer stepId={step} direction={direction}>
-          {step === "splash" && <SplashView onStart={() => next()} />}
-          {step === "rating" && <RatingView onSelect={(rating) => next({ rating })} />}
-          {step === "honesty" && <HonestyView onNext={() => next()} />}
-          
-          {/* Path A */}
-          {step === "helped" && <HelpedView onNext={(helped) => next({ helped })} />}
-          {step === "would_improve" && <WouldImproveView onNext={(would_improve) => next({ would_improve })} />}
-          {step === "missing_product" && <MissingProductView onAnswer={(missing_product) => next({ missing_product })} />}
-          {step === "has_provider" && <HasProviderView onAnswer={(has_provider) => next({ has_provider })} />}
-          {step === "reason" && <ReasonView onNext={(reason) => next({ reason })} />}
-          {step === "positive_acknowledgment" && <PositiveAcknowledgmentView onNext={() => next()} />}
-          {step === "catalog" && <CatalogView />}
-
-          {/* Path B */}
-          {step === "failed" && <FailedView onNext={(data) => next(data)} />}
-          {step === "acknowledgment" && <AcknowledgmentView onAnswer={(wants_contact) => next({ wants_contact })} />}
-          {step === "contact_method" && (
-            <ContactMethodView onSelect={(vals) => next(vals)} />
-          )}
-          {step === "working" && <WorkingView />}
-          {step === "understood" && <UnderstoodView />}
-        </StepContainer>
-      </div>
-    </main>
+        {/* PATH B */}
+        {step === "failed" && <FailedView onNext={(data: any) => next(data)} />}
+        {step === "acknowledgment" && <AcknowledgmentView onAnswer={(wants_contact: boolean) => next({ wants_contact })} />}
+        {step === "contact_method" && <ContactMethodView onSelect={(data: any) => next(data)} />}
+        {step === "working" && <WorkingView />}
+        {step === "understood" && <UnderstoodView />}
+      </StepContainer>
+    </div>
   );
 }

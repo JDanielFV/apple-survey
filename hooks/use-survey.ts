@@ -10,7 +10,19 @@ export function useSurvey() {
   const [history, setHistory] = useState<SurveyStep[]>([]);
 
   const next = (newAnswers?: Partial<SurveyAnswers>) => {
-    const updatedAnswers = { ...answers, ...newAnswers };
+    // Si estamos en el paso de rating, limpiamos datos previos de otros caminos
+    let baseAnswers = { ...answers };
+    if (newAnswers?.rating !== undefined) {
+      // Limpiamos campos específicos para evitar que se mezclen respuestas de pruebas fallidas con exitosas
+      const { 
+        failed, failed_categories, wants_contact, contact_method, contact_detail, contact_schedule,
+        helped, would_improve, missing_product, has_provider, reason,
+        ...rest 
+      } = baseAnswers;
+      baseAnswers = rest;
+    }
+
+    const updatedAnswers = { ...baseAnswers, ...newAnswers };
     setAnswers(updatedAnswers);
     setHistory([...history, step]);
     setDirection(1);
@@ -32,7 +44,7 @@ export function useSurvey() {
         setStep(isGoodPath ? "helped" : "failed");
         break;
 
-      // PATH A
+      // PATH A (Positivo)
       case "helped":
         setStep("would_improve");
         break;
@@ -56,7 +68,7 @@ export function useSurvey() {
         setStep("catalog");
         break;
 
-      // PATH B
+      // PATH B (Falla)
       case "failed":
         setStep("acknowledgment");
         break;

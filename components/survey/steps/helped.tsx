@@ -13,7 +13,9 @@ const OPTIONS = [
   "Calidad",
   "Posicionamiento",
   "Ventas",
+  "Costos",
   "Organización",
+  "No necesariamente",
   "Otro"
 ];
 
@@ -30,7 +32,7 @@ export function HelpedView({ onNext }: HelpedViewProps) {
     <div className="flex flex-col items-center justify-center w-full px-6 gap-10 max-w-md mx-auto">
       <div className="text-center space-y-4">
         <h2 className="survey-title !text-center !text-[32px]">
-          ¿En que te hemos ayudado?
+          ¿Te hemos ayudado en algo?
         </h2>
         <p className="survey-light !text-[18px]">Selecciona una o varias opciones</p>
       </div>

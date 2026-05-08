@@ -1,18 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect } from "react";
 
 interface PositiveAcknowledgmentViewProps {
   onNext: () => void;
 }
 
 export function PositiveAcknowledgmentView({ onNext }: PositiveAcknowledgmentViewProps) {
-  useEffect(() => {
-    const timer = setTimeout(onNext, 4000);
-    return () => clearTimeout(timer);
-  }, [onNext]);
-
   return (
     <div className="flex flex-col items-center justify-center w-full px-8 text-center gap-10 max-w-sm mx-auto">
       <div className="space-y-6">
@@ -25,18 +19,12 @@ export function PositiveAcknowledgmentView({ onNext }: PositiveAcknowledgmentVie
         </p>
       </div>
 
-      <div className="w-full max-w-[200px] h-1 bg-gray-100 rounded-full overflow-hidden">
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 4, ease: "linear" }}
-          className="h-full bg-black"
-        />
-      </div>
-      
-      <p className="survey-light !text-[14px] !text-gray-300 uppercase tracking-widest">
-        Cargando catálogo...
-      </p>
+      <button
+        onClick={onNext}
+        className="w-full bg-black text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-black/10 transition-all active:scale-95"
+      >
+        Continuar
+      </button>
     </div>
   );
 }

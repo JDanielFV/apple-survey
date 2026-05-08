@@ -51,7 +51,7 @@ export function HonestyView({ onNext }: HonestyViewProps) {
           transition={{ duration: 0.8 }}
           className="survey-title !text-left"
         >
-          No buscamos elogios, buscamos la verdad. Tu honestidad, por cruda que sea, es lo único que nos ayuda a mejorar de verdad.
+          No buscamos elogios, buscamos la verdad. <br />Tu honestidad, por cruda que sea, es lo único que nos ayuda a mejorar de verdad.
         </motion.h1>
       </div>
 
