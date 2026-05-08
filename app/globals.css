@@ -1,135 +1,117 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-
-  /* Apple specific tokens */
-  --color-apple-bg: #F5F5F7;
-  --color-apple-text: #1D1D1F;
-  --color-apple-secondary: #86868B;
-  --color-apple-blue: #0071E3;
+  
+  /* A&G Premium Palette */
+  --color-guinda: #8B1D3D;
+  --color-guinda-light: #A32448;
+  --color-guinda-dark: #6B1630;
+  --color-gold: #D4AF37;
+  
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-2xl: 40px;
 }
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #000000;
-  --card: #FFFFFF;
-  --card-foreground: #000000;
-  --popover: #FFFFFF;
-  --popover-foreground: #000000;
-  --primary: #000000;
+  --background: #FDFDFD;
+  --foreground: #1A1A1A;
+  
+  --primary: #8B1D3D;
   --primary-foreground: #FFFFFF;
-  --secondary: #F5F5F7;
-  --secondary-foreground: #000000;
-  --muted: #F5F5F7;
-  --muted-foreground: #86868B;
-  --accent: #F5F5F7;
-  --accent-foreground: #000000;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #E8E8ED;
-  --input: #E8E8ED;
-  --ring: #000000;
-  --chart-1: #000000;
-  --chart-2: #86868B;
-  --chart-3: #1D1D1F;
-  --chart-4: #D2D2D7;
-  --chart-5: #E8E8ED;
-  --radius: 20px;
-  --sidebar: #F5F5F7;
-  --sidebar-foreground: #1D1D1F;
-  --sidebar-primary: #000000;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #E8E8ED;
-  --sidebar-accent-foreground: #1D1D1F;
-  --sidebar-border: #D2D2D7;
-  --sidebar-ring: #000000;
+  
+  --card: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(139, 29, 61, 0.1);
+  
+  --radius: 24px;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--card-border);
+    outline-color: rgba(139, 29, 61, 0.2);
   }
+  
   body {
-    @apply bg-white text-black font-sans antialiased;
+    background: radial-gradient(circle at top right, #FFFFFF 0%, #F5F5F7 100%);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
   }
 }
 
 @layer components {
+  /* Efecto de Cristal para Tarjetas */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 29, 61, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  }
+
   .survey-title {
     font-family: 'Montserrat';
-    font-weight: 700;
-    font-size: clamp(2rem, 5vw, 2.56rem); /* 41px aprox a escala */
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    text-align: left;
-    color: #000000;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #1A1A1A;
+    background: linear-gradient(135deg, #1A1A1A 0%, #8B1D3D 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .survey-body {
     font-family: 'Montserrat';
-    font-weight: 300;
-    font-size: clamp(1.25rem, 3vw, 1.75rem); /* 28px aprox a escala */
-    line-height: 1.4;
-    letter-spacing: -0.01em;
-    text-align: left;
-    color: #000000;
-  }
+    font-weight: 400;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    line-height: 1.5;
+    color: #4A4A4A;
+  }k
 
   .survey-light {
     font-family: 'Montserrat';
     font-weight: 300;
-    font-size: clamp(1rem, 2.5vw, 1.5rem);
-    line-height: 1.5;
-    letter-spacing: 0em;
-    text-align: center;
-    color: #000000;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: #666666;
   }
 
-  .survey-divider {
-    @apply w-32 h-[2px] bg-black/10 my-8;
+  /* Botones Premium */
+  .btn-premium {
+    background: linear-gradient(135deg, #8B1D3D 0%, #6B1630 100%);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 10px 20px -5px rgba(139, 29, 61, 0.3);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   }
+
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(139, 29, 61, 0.4);
+    filter: brightness(1.1);
+  }
+
+  .btn-premium:active {
+    transform: translateY(0);
+  }
+}
+
+/* Animaciones sutiles */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

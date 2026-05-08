@@ -10,10 +10,8 @@ export function useSurvey() {
   const [history, setHistory] = useState<SurveyStep[]>([]);
 
   const next = (newAnswers?: Partial<SurveyAnswers>) => {
-    // Si estamos en el paso de rating, limpiamos datos previos de otros caminos
     let baseAnswers = { ...answers };
     if (newAnswers?.rating !== undefined) {
-      // Limpiamos campos específicos para evitar que se mezclen respuestas de pruebas fallidas con exitosas
       const { 
         failed, failed_categories, wants_contact, contact_method, contact_detail, contact_schedule,
         helped, would_improve, missing_product, has_provider, reason,
@@ -59,10 +57,23 @@ export function useSurvey() {
         }
         break;
       case "has_provider":
-        setStep("reason");
+        // Si YA TIENE proveedor, le preguntamos la razón (feedback)
+        // Si ESTÁ BUSCANDO (has_provider === false), saltamos directo al contacto (oportunidad)
+        if (updatedAnswers.has_provider) {
+          setStep("reason");
+        } else {
+          setStep("positive_contact_check");
+        }
         break;
       case "reason":
-        setStep("catalog");
+        setStep("positive_contact_check");
+        break;
+      case "positive_contact_check":
+        if (updatedAnswers.wants_contact) {
+          setStep("contact_method");
+        } else {
+          setStep("positive_acknowledgment");
+        }
         break;
       case "positive_acknowledgment":
         setStep("catalog");
@@ -80,7 +91,11 @@ export function useSurvey() {
         }
         break;
       case "contact_method":
-        setStep("working");
+        if (isGoodPath) {
+          setStep("positive_acknowledgment");
+        } else {
+          setStep("working");
+        }
         break;
       
       default:

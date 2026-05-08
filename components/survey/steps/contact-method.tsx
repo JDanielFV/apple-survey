@@ -61,7 +61,6 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
   const [detail, setDetail] = useState("");
   const [touched, setTouched] = useState(false);
 
-  // Estados para los selectores de horario
   const [startDay, setStartDay] = useState("Lunes");
   const [endDay, setEndDay] = useState("Viernes");
   const [startTime, setStartTime] = useState("09:00");
@@ -80,7 +79,6 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
   const handleConfirm = (id: ContactOption) => {
     if (!isValid) return;
 
-    // Construir el string del horario
     let scheduleString = "";
     if (activeOption?.hasSchedule) {
       const daysPart = startDay === endDay ? startDay : `${startDay} a ${endDay}`;
@@ -95,32 +93,39 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
   };
 
   return (
-    <div className="flex flex-col gap-10 max-w-sm mx-auto w-full">
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-10 w-full">
+      <div className="flex flex-col gap-3">
         <h2 className="survey-title !text-left !text-[32px]">
-          ¿Por que medio te gustaría que nos comunicaramos?
+          ¿Por qué medio te gustaría que nos comunicáramos?
         </h2>
       </div>
 
-      <div className="flex flex-col gap-3 w-full">
+      <div className="flex flex-col gap-4 w-full">
         {OPTIONS.map(({ id, label, icon: Icon, detailPlaceholder, detailLabel, detailType, hasSchedule, errorMsg }) => {
           const isExpanded = expanded === id;
 
           return (
-            <div key={id} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 transition-shadow">
+            <div 
+              key={id} 
+              className={`flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${
+                isExpanded ? 'border-guinda/20 bg-guinda/[0.02] shadow-lg shadow-guinda/5' : 'border-gray-100 bg-white/50 hover:border-gray-200'
+              }`}
+            >
               <button
                 onClick={() => handleOptionClick(id)}
-                className="flex items-center gap-4 px-6 py-5 w-full text-left"
+                className="flex items-center gap-4 px-6 py-5 w-full text-left group"
               >
-                <Icon className="w-5 h-5 text-black shrink-0" />
-                <span className="flex-1 font-bold text-base text-black capitalize">
+                <div className={`p-2 rounded-lg transition-colors ${isExpanded ? 'bg-guinda text-white' : 'bg-gray-100 text-gray-400 group-hover:text-guinda'}`}>
+                  <Icon className="w-5 h-5 shrink-0" />
+                </div>
+                <span className={`flex-1 font-bold text-base transition-colors ${isExpanded ? 'text-guinda' : 'text-gray-600'}`}>
                   {label}
                 </span>
                 <motion.div
                   animate={{ rotate: isExpanded ? 90 : 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <ChevronRight className="w-4 h-4 text-black" />
+                  <ChevronRight className={`w-4 h-4 ${isExpanded ? 'text-guinda' : 'text-gray-300'}`} />
                 </motion.div>
               </button>
 
@@ -135,12 +140,11 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
                     className="overflow-hidden"
                   >
                     <div className="flex flex-col gap-5 px-6 pb-6">
-                      <div className="w-full h-px bg-black/5" />
+                      <div className="w-full h-px bg-guinda/5" />
 
-                      {/* Campo de Detalle (Tel/Email) */}
                       <div className="flex flex-col gap-1">
-                        <div className="flex justify-between items-center">
-                          <label className="text-[10px] font-black text-black uppercase tracking-widest">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-[10px] font-black text-guinda/60 uppercase tracking-widest">
                             {detailLabel}
                           </label>
                           {showError && (
@@ -156,7 +160,6 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
                           value={detail}
                           onChange={(e) => {
                             const val = e.target.value;
-                            // Si es teléfono, solo permitimos números
                             if (detailType === "tel") {
                               const numericValue = val.replace(/\D/g, "");
                               setDetail(numericValue);
@@ -166,87 +169,47 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
                             setTouched(true);
                           }}
                           placeholder={detailPlaceholder}
-                          className={`w-full rounded-xl border ${showError ? 'border-red-500 bg-red-50' : 'border-black/10 bg-white'} px-4 py-3 text-base text-black placeholder:text-gray-300 focus:outline-none transition-all`}
+                          className={`w-full rounded-xl border px-4 py-4 text-base font-bold focus:outline-none transition-all ${
+                            showError ? 'border-red-500 bg-red-50 text-red-700' : 'border-guinda/10 bg-white text-black focus:border-guinda focus:ring-4 focus:ring-guinda/5'
+                          }`}
                         />
                       </div>
 
-                      {/* Selectores de Horario */}
                       {hasSchedule && (
-                        <div className="flex flex-col gap-4 bg-white/50 p-4 rounded-2xl border border-black/5">
+                        <div className="flex flex-col gap-4 bg-white p-5 rounded-2xl border border-guinda/10 shadow-sm">
                           <div className="flex items-center gap-2 mb-1">
-                            <Calendar className="w-3 h-3 text-gray-400" />
-                            <label className="text-[10px] font-black text-black uppercase tracking-widest">
+                            <Calendar className="w-3 h-3 text-guinda/40" />
+                            <label className="text-[10px] font-black text-guinda/60 uppercase tracking-widest">
                               Días disponibles
                             </label>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-3">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[9px] font-bold text-gray-400">De</span>
-                              <select 
-                                value={startDay}
-                                onChange={(e) => setStartDay(e.target.value)}
-                                className="w-full bg-white border border-black/10 rounded-lg p-2 text-sm font-bold outline-none"
-                              >
-                                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                              </select>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[9px] font-bold text-gray-400">A</span>
-                              <select 
-                                value={endDay}
-                                onChange={(e) => setEndDay(e.target.value)}
-                                className="w-full bg-white border border-black/10 rounded-lg p-2 text-sm font-bold outline-none"
-                              >
-                                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                              </select>
-                            </div>
+                            <ScheduleSelect label="De" value={startDay} onChange={setStartDay} options={DAYS} />
+                            <ScheduleSelect label="A" value={endDay} onChange={setEndDay} options={DAYS} />
                           </div>
 
                           <div className="flex items-center gap-2 mt-2 mb-1">
-                            <Clock className="w-3 h-3 text-gray-400" />
-                            <label className="text-[10px] font-black text-black uppercase tracking-widest">
+                            <Clock className="w-3 h-3 text-guinda/40" />
+                            <label className="text-[10px] font-black text-guinda/60 uppercase tracking-widest">
                               Rango de Horas
                             </label>
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[9px] font-bold text-gray-400">De</span>
-                              <select 
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                className="w-full bg-white border border-black/10 rounded-lg p-2 text-sm font-bold outline-none"
-                              >
-                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                              </select>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[9px] font-bold text-gray-400">A</span>
-                              <select 
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                                className="w-full bg-white border border-black/10 rounded-lg p-2 text-sm font-bold outline-none"
-                              >
-                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                              </select>
-                            </div>
+                            <ScheduleSelect label="De" value={startTime} onChange={setStartTime} options={HOURS} />
+                            <ScheduleSelect label="A" value={endTime} onChange={setEndTime} options={HOURS} />
                           </div>
                         </div>
                       )}
 
-                      <motion.button
-                        whileTap={isValid ? { scale: 0.97 } : {}}
+                      <button
                         onClick={() => handleConfirm(id)}
                         disabled={!isValid}
-                        className={`w-full py-4 mt-1 rounded-xl font-black text-base tracking-tight transition-all shadow-lg ${
-                          isValid 
-                            ? 'bg-black text-white shadow-black/10' 
-                            : 'bg-gray-100 text-gray-400 shadow-none pointer-events-none'
-                        }`}
+                        className="btn-premium w-full py-5 rounded-2xl text-lg disabled:opacity-30 disabled:pointer-events-none mt-2"
                       >
                         Confirmar
-                      </motion.button>
+                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -255,6 +218,21 @@ export function ContactMethodView({ onSelect }: ContactMethodViewProps) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function ScheduleSelect({ label, value, onChange, options }: { label: string, value: string, onChange: (v: string) => void, options: string[] }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[9px] font-bold text-gray-400 ml-1">{label}</span>
+      <select 
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-sm font-bold outline-none focus:border-guinda/30 transition-all cursor-pointer"
+      >
+        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+      </select>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { ReasonView } from "@/components/survey/steps/reason";
 import { ContactMethodView } from "@/components/survey/steps/contact-method";
 import { PositiveAcknowledgmentView } from "@/components/survey/steps/positive-acknowledgment";
 import { AcknowledgmentView } from "@/components/survey/steps/acknowledgment";
+import { PositiveContactCheckView } from "@/components/survey/steps/positive-contact-check";
 import { CatalogView } from "@/components/survey/steps/catalog";
 import { WorkingView } from "@/components/survey/steps/working";
 import { UnderstoodView } from "@/components/survey/steps/understood";
@@ -121,6 +122,7 @@ export default function SurveyPage({ params }: { params: Promise<{ slug: string 
         {step === "missing_product" && <MissingProductView onAnswer={(missing_product: string) => next({ missing_product })} />}
         {step === "has_provider" && <HasProviderView onAnswer={(has_provider: boolean) => next({ has_provider })} />}
         {step === "reason" && <ReasonView onNext={(reason: string) => next({ reason })} />}
+        {step === "positive_contact_check" && <PositiveContactCheckView onAnswer={(wants_contact: boolean) => next({ wants_contact })} />}
         {step === "positive_acknowledgment" && <PositiveAcknowledgmentView onNext={() => next()} />}
         {step === "catalog" && <CatalogView />}
 
